@@ -104,7 +104,8 @@ const SUBCOMMAND_HINTS: Record<string, string> = {
 
 // Auto-start gateway + dispatch for commands that need them
 const SERVICE_CMDS = new Set(["ask", "-", "work", "task", "shell", "fetch", "memory", "rag"]);
-if (SERVICE_CMDS.has(subcommand)) await ensureServices();
+// Asking for help must never start the gateway or the dispatch daemon.
+if (SERVICE_CMDS.has(subcommand) && rest[0] !== "--help" && rest[0] !== "-h") await ensureServices();
 
 switch (subcommand) {
   case "--version":

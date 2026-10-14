@@ -14,6 +14,11 @@ is versioned separately and does not change with releases.
 
 Detailed engineering notes for each change live in `DEVLOG.md`.
 
+## 1.1.1 — 2026-10-14
+
+### Fixed
+- `wire task --help` (and `--help` on `ask`, `-`, `work`, `shell`, `fetch`, `memory`, `rag`) no longer starts the gateway and the dispatch daemon in the background before printing help.
+
 ## 1.1.0 — 2026-10-14
 
 ### Security
