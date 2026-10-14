@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# wire-up — Wire startup briefing
+# Run: wire-up
+# Or add to .bashrc for manual invocation: alias wire-up='bun run <wire-dir>/src/startup/index.ts'
+# Do NOT add to .bashrc auto-exec until tested over several sessions.
+
+exec bun run "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../src/startup/index.ts" "$@"

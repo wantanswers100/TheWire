@@ -1,0 +1,24 @@
+{
+  "name": "agent-wire",
+  "version": "1.1.0",
+  "description": "Wire: a local-first AI dispatcher. Plain-English requests routed to Ollama, Claude, Codex, agy, Gemini or your shell, with human approval.",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "build": "bun build src/cli/index.ts --outfile dist/wire --target bun",
+    "wire": "bun run src/cli/index.ts",
+    "wire-gateway": "bun run src/gateway/server.ts",
+    "wire-mcp": "bun run src/mcp/server.ts",
+    "bootstrap": "bun run scripts/bootstrap.ts",
+    "benchmark": "bun run benchmark/token-efficiency.ts",
+    "wire-start": "bun run src/startup/index.ts",
+    "wire-watch": "bun run src/startup/watch.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Wire Platform",
+  "description": "Local-first personal AI dispatch platform. Orchestrates Claude, Gemini, Ollama, Codex, and system workers via WireProtocol v1 — typed, Ed25519-signed, AES-256-GCM encrypted. Offline-capable, HITL-gated shell execution, 2-layer semantic router.",
+  "version": "1.0.0",
+  "url": "http://localhost:31338",
+  "documentationUrl": "https://github.com/yourusername/agent-wire/blob/main/docs/ARCHITECTURE.md",
+  "provider": {
+    "name": "Wire Platform (local instance)",
+    "organization": "local",
+    "contact": "local-only"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true
+  },
+  "authentication": {
+    "schemes": [
+      {
+        "scheme": "ed25519-signature",
+        "description": "Per-agent Ed25519 keypairs. Sender signs, recipient verifies. HMAC-SHA256 over canonical field-sorted JSON. X25519 ECDH for AES-256-GCM payload encryption."
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "system",
+      "name": "Linux / Shell Operations",
+      "description": "Execute Linux system operations from plain English. Covers all levels: disk, memory, processes, network, services, files, users, Docker, git. Every command requires explicit HITL approval before execution. Shell safety blocklist enforced at code level.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["linux", "shell", "system", "hitl"],
+      "examples": [
+        "show me my disk usage",
+        "what is eating my CPU",
+        "list open ports",
+        "install nginx and check if it's running"
+      ]
+    },
+    {
+      "id": "quick",
+      "name": "Fast Local Tasks",
+      "description": "Quick local inference via qwen3:1.7b. Used for fast answers, simple lookups, and low-latency responses that do not require a larger model.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["local", "fast", "ollama"],
+      "examples": [
+        "what does this bash one-liner do",
+        "give me a quick regex for email validation"
+      ]
+    },
+    {
+      "id": "summarize",
+      "name": "Summarization",
+      "description": "Summarize text, files, standup notes, documents, or code sections. Runs locally via qwen3:1.7b.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["local", "summarize", "ollama"],
+      "examples": [
+        "summarize my standup notes",
+        "tldr for the deployment log"
+      ]
+    },
+    {
+      "id": "explain",
+      "name": "Explanations",
+      "description": "Explain code, architecture, concepts, or files using qwen3:4b (256K context). Can explain full source files.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["local", "explain", "ollama"],
+      "examples": [
+        "explain the dispatch loop architecture",
+        "what does this TypeScript generic do",
+        "how does X25519 key exchange work"
+      ]
+    },
+    {
+      "id": "research",
+      "name": "Research + Queries",
+      "description": "Research tasks, factual queries, and live web search. Routes to Gemini for real-time web queries (--live flag). Routes to local Ollama for static questions.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["research", "gemini", "web-search"],
+      "examples": [
+        "research UK housing policy 2026",
+        "what is the weather in NYC",
+        "latest developments in AI agent frameworks"
+      ]
+    },
+    {
+      "id": "implement",
+      "name": "Code Implementation",
+      "description": "Implement new features, modules, or systems. Routes to Claude (online) or Codex. Generates production-ready TypeScript/Bun code following project CLAUDE.md constraints.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "claude", "codex", "implement"],
+      "examples": [
+        "implement an auth guard for the API",
+        "build a SQLite migration runner in TypeScript"
+      ]
+    },
+    {
+      "id": "debug",
+      "name": "Debugging",
+      "description": "Debug errors, trace exceptions, analyze crash logs, and identify root causes. Routes to Claude or local qwen2.5-coder:14b depending on complexity.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "debug", "claude"],
+      "examples": [
+        "fix the TypeError in router.ts line 42",
+        "why is the dispatch loop dropping messages"
+      ]
+    },
+    {
+      "id": "refactor",
+      "name": "Refactoring",
+      "description": "Refactor code for clarity, performance, or architecture. Routes to Claude or Codex.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "refactor", "claude", "codex"],
+      "examples": [
+        "refactor the classifier to use a strategy pattern",
+        "clean up the envelope encode pipeline"
+      ]
+    },
+    {
+      "id": "code_review",
+      "name": "Code Review",
+      "description": "First-pass code review using qwen2.5-coder:14b locally. Covers style, patterns, risks, and missing tests. Optional escalation to Claude for security-critical review.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "review", "local", "ollama"],
+      "examples": [
+        "review src/router/classifier.ts",
+        "code review the dispatch loop for race conditions"
+      ]
+    },
+    {
+      "id": "scaffold",
+      "name": "Boilerplate Generation",
+      "description": "Generate project scaffolds, file templates, and boilerplate code. Routes to Codex.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "scaffold", "codex"],
+      "examples": [
+        "scaffold a new TypeScript Bun CLI command",
+        "generate a Zod schema for a user profile"
+      ]
+    },
+    {
+      "id": "verify",
+      "name": "Verification",
+      "description": "Verify that code, architecture, or behavior meets stated requirements. Routes to Claude.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["code", "verify", "claude"],
+      "examples": [
+        "verify the HMAC signing matches the WireProtocol spec",
+        "confirm the TTL expiry logic is correct"
+      ]
+    },
+    {
+      "id": "audit",
+      "name": "Security Audit",
+      "description": "Security audit of code, configuration, or architecture. Routes to Claude (audit specialist). Also accessible via `wire diagnose` for structured multi-angle assessment.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["security", "audit", "claude"],
+      "examples": [
+        "audit the key storage for permission issues",
+        "security review of the shell execution path"
+      ]
+    },
+    {
+      "id": "wire",
+      "name": "WireProtocol Handoffs",
+      "description": "Wire-to-Wire protocol handoffs. Constructs typed, signed, encrypted messages for inter-agent communication using WireProtocol v1.",
+      "inputModes": ["text"],
+      "outputModes": ["text"],
+      "tags": ["protocol", "handoff", "signed"],
+      "examples": [
+        "send a task to the gemini agent",
+        "forward this research request to ollama"
+      ]
+    }
+  ],
+  "wireExtensions": {
+    "protocol": "WireProtocol v1",
+    "protocolFeatures": [
+      "Ed25519 per-agent keypairs (sign + verify)",
+      "HMAC-SHA256 over canonical field-sorted JSON",
+      "AES-256-GCM payload encryption (X25519 ECDH key exchange)",
+      "16-byte nonce + timestamp + TTL replay prevention",
+      "Nonce store in .wire-state/ for replay detection"
+    ],
+    "agents": ["claude", "gemini", "codex", "ollama", "system"],
+    "router": {
+      "layer1": "Rule-based (19 routing rules, agent profiles, EMA weight learning)",
+      "layer2": "qwen3:4b semantic classifier (256K context, structured output schema)"
+    },
+    "hitl": {
+      "shellExecution": "mandatory — every command shown before execution, y/N approval required",
+      "blocklist": ["rm -rf /", "fork bombs", "disk wipes", "filesystem format"]
+    },
+    "localModels": {
+      "qwen3:1.7b": "quick + summarize",
+      "qwen3:4b": "classify + route + explain",
+      "qwen2.5-coder:14b": "code review + diagnose",
+      "nomic-embed-text": "RAG embeddings"
+    },
+    "security": {
+      "promptInjectionGuard": true,
+      "pathTraversalGuard": true,
+      "ttyGuard": true,
+      "replayPrevention": true
+    },
+    "commands": [
+      "wire - <english>",
+      "wire ask <task>",
+      "wire work <project> <task>",
+      "wire shell <cmd>",
+      "wire diagnose <project>",
+      "wire setup",
+      "wire wakeup",
+      "wire fetch <url> <question>",
+      "wire classify <text>",
+      "wire route --skill <skill>",
+      "wire memory search <query>",
+      "wire status",
+      "wire dispatch start|stop|status"
+    ]
+  }
+}

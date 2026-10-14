@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "lib": ["ESNext"],
+    "types": ["bun-types"],
+    "outDir": "dist",
+    "rootDir": ".",
+    "paths": {
+      "@wire/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "tests/**/*", "benchmark/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

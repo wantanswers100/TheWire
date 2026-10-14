@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Resolve the repo from this script's real location (it is usually reached via
+# a ~/.local/bin symlink), so the launcher works for any user and install dir.
+WIRE_ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+exec bun run "$WIRE_ROOT/src/cli/index.ts" "$@"
