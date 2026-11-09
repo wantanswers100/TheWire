@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildMessage, serializeMessage, wireFilename } from "../envelope/encode.js";
+import { AgentIdSchema, SkillTypeSchema } from "../schema/wirespec.js";
 import type { AgentId, SkillType, TaskVerb, OutputFormat, Priority, TaskSpec } from "../types.js";
 
 // ─── task subcommand ──────────────────────────────────────────────────────────
@@ -63,7 +64,7 @@ Usage: wire task --to <agent> --skill <skill> --verb <verb> [options]
 
 Required:
   --to <agent>       Destination agent: ollama | gemini | codex | claude | system
-  --skill <skill>    Skill: quick | research | knowledge | debug | code | general
+  --skill <skill>    Skill: ${SkillTypeSchema.options.join(" | ")}
   --verb <verb>      Action: query | summarize | implement | review | verify |
                              transform | classify | plan | explain | debug
 
@@ -94,6 +95,18 @@ Examples:
   if (missing.length > 0) {
     console.error(`Missing required flags: ${missing.join(", ")}`);
     console.error("Run: wire task --help");
+    process.exit(1);
+  }
+
+  // ISS-069: validate against the same schema the daemon enforces. An
+  // invalid skill used to print "Task queued" while the daemon discarded the
+  // file as schema_invalid, so the task silently never ran.
+  if (!SkillTypeSchema.safeParse(flags.skill).success) {
+    console.error(`Invalid --skill "${flags.skill}". Valid: ${SkillTypeSchema.options.join(" | ")}`);
+    process.exit(1);
+  }
+  if (!AgentIdSchema.safeParse(flags.to).success) {
+    console.error(`Invalid --to "${flags.to}". Valid: ${AgentIdSchema.options.join(" | ")}`);
     process.exit(1);
   }
 

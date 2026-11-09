@@ -65,7 +65,7 @@ export const PROVIDER_POLICIES: ProviderPolicy[] = [
     costClass: "free-tier",
     defaultUse: "research, plan, synthesis — Gemini fallback when REST API quota-hit or GEMINI_API_KEY absent",
     consentRequired: false,
-    notes: "CLI subprocess only. No token counts. Tiers: flash-low/medium/high (speed), pro-low/pro-high (frontier). Default: gemini-3.7-flash-medium. Flex via AGY_RESEARCH/AGY_SYNTHESIZE env vars. Fallback position: after gemini REST, before claude.",
+    notes: "CLI subprocess only. No token counts. Tiers: flash-low/medium/high (speed), pro-low/pro-high (frontier). Default: gemini-3.8-flash-medium. Flex via AGY_RESEARCH/AGY_SYNTHESIZE env vars. Fallback position: after gemini REST, before claude.",
   },
   {
     agent: "codex",

@@ -15,6 +15,7 @@ import { classify, classifyExtended, isClassifierAvailable } from "./classifier.
 import { SkillRouter } from "./SkillRouter.js";
 import { DispatchDB } from "../dispatch/db.js";
 import type { RoutingRequest, RoutingDecision, AgentId, RoutingRule } from "./types.js";
+import { isAgentAllowed } from "./agentAllowlist.js";
 // ISS-031: sourced from config/paths.ts.
 import { GATEWAY_URL as GATEWAY } from "../config/paths.js";
 
@@ -174,6 +175,25 @@ export class WireRouter {
       }
     }
 
+    // An explicit agent override (modelFilter, set by `--to`/`--models`) must
+    // never be silently re-routed to an agent outside the filter (ISS-069):
+    // no matching rule lists codex for code_review, so `--to codex` used to
+    // fall through to the claude last resort below and report success.
+    // Prefer an available filtered agent; otherwise attempt the first one so
+    // its real failure surfaces instead of a substitute's answer.
+    if (req.modelFilter && req.modelFilter.size > 0) {
+      const requested = [...req.modelFilter];
+      const available = requested.filter(a => this.isAgentAvailable(a, gwUp, ollamaUp));
+      const agent: AgentId = available[0] ?? requested[0]!;  // size > 0 checked above
+      return {
+        agent,
+        ollamaModel: agent === "ollama" ? (OLLAMA_MODEL_FOR_SKILL[req.skill] ?? OLLAMA_DEFAULT_MODEL) : undefined,
+        rule: "explicit-override",
+        fallbacksAvailable: available.filter(a => a !== agent),
+        costTier: AGENT_PROFILES[agent]?.costTier ?? "high",
+      };
+    }
+
     // Absolute last resort — claude (always available via CLI even without gateway)
     return {
       agent: "claude",
@@ -243,6 +263,7 @@ export class WireRouter {
   }
 
   private isAgentAvailable(agent: AgentId, gwUp: boolean, ollamaUp: boolean): boolean {
+    if (!isAgentAllowed(agent)) return false;  // WIRE_ROUTING_AGENTS operator allowlist
     if (agent === "ollama") return ollamaUp;
     if (agent === "claude") return !this.claudeRecentlyFailed();
     return gwUp;                           // all others need the gateway

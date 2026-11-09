@@ -1,5 +1,5 @@
 # ─── Dependencies ─────────────────────────────────────────────────────────────
-node_modules/
+node_modules
 dist/
 
 # ─── Keys and secrets — NEVER commit these ────────────────────────────────────

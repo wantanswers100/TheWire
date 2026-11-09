@@ -12,6 +12,7 @@ import { GEMINI_MODEL_BY_ROLE, GROQ_MODEL_BY_ROLE } from "../gateway/complete.js
 import { PROJECT_ROOT, STATE_DIR, GATEWAY_URL } from "../config/paths.js";
 import { checkAgyAuth } from "../dispatch/agyAuth.js";
 import { checkCodexAuth } from "../dispatch/codexAuth.js";
+import { checkAllModels } from "../dispatch/modelFreshness.js";
 import { APP_VERSION, formatVersionLine } from "../version.js";
 
 const PID_FILE = join(STATE_DIR, "dispatch.pid");
@@ -244,6 +245,13 @@ async function apiModelsSection(): Promise<void> {
     console.log(`  ${warn("✗")} ${"Antigravity".padEnd(8)} ${warn("NOT READY")}  ${dim("agy present but --version failed — check OAuth/install")}`);
   } else {
     console.log(`  ${ok("✓")} ${"Antigravity".padEnd(8)} ${ok("READY")}     ${dim(`agy ${agy.cliVersion} — presence-only check, not a live call`)}`);
+  }
+
+  console.log(bold("\nAgent Models (configured vs offered today)"));
+  for (const c of checkAllModels()) {
+    const mark = c.status === "ok" ? ok("✓") : warn("✗");
+    const label = c.status === "ok" ? ok("OK") : warn(c.status.toUpperCase());
+    console.log(`  ${mark} ${c.agent.padEnd(11)} ${label.padEnd(9)} ${c.configured}  ${dim(c.detail)}`);
   }
 }
 

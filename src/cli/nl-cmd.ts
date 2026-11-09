@@ -358,8 +358,10 @@ export async function runNl(
     flags.to ?? (result.preferredAgent as AgentId | undefined) ?? decision.agent;
   const ollamaModel = agent === decision.agent ? decision.ollamaModel : undefined;
 
-  // If qwen3:1.7b fallback omitted subject, use the raw task text (truncated)
-  const subject = result.subject ?? taskText.slice(0, 80);
+  // If qwen3:1.7b fallback omitted subject, use the raw task text. Never
+  // truncate the dispatched subject: it is the task itself (ISS-069 — an
+  // 80-char cut dropped file paths from handoff instructions).
+  const subject = result.subject ?? taskText;
 
   // ─── Live search (--live flag) ────────────────────────────────────────────
 

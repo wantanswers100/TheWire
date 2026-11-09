@@ -14,6 +14,23 @@ is versioned separately and does not change with releases.
 
 Detailed engineering notes for each change live in `DEVLOG.md`.
 
+## 1.2.1 — 2026-11-08
+
+### Fixed
+- A test fixture used a real private project's file name as its example path. It now uses a neutral name. No behaviour change.
+
+## 1.2.0 — 2026-11-08
+
+### Added
+- `WIRE_ROUTING_AGENTS` (for example `claude,codex,antigravity`) limits which agents Wire may use. Agents not listed are never picked, and are refused even if asked for by name. The local Ollama classifier and quality judge are skipped when Ollama is not listed. Unset, nothing changes.
+- `wire status` has a new "Agent Models" section that checks each configured agy, Codex and Claude model against what that tool offers today, and the dispatch daemon logs the same check at startup, so a retired model is caught before it fails a task.
+
+### Fixed
+- agy dispatch failed on every task because Wire asked for `gemini-3.7-flash-medium`, a model agy no longer offers. Defaults now use `gemini-3.8-flash-*` and `gemini-4-argon-low`, and if agy ever rejects a model name again, Wire retries once on agy's default and records that it did.
+- `wire ask --to <agent>` and `wire task --to <agent>` now always run on the agent you named. Before, a request for an agent the skill's normal route didn't include (for example Codex for a code review) silently ran on Claude instead.
+- `wire task` now rejects an unknown `--skill` straight away, and its help lists the real skills. Before, it printed "Task queued" and the daemon threw the task away without telling you.
+- Long instructions are no longer cut to 80 characters before dispatch, so file paths in handoff instructions arrive intact.
+
 ## 1.1.1 — 2026-10-14
 
 ### Fixed

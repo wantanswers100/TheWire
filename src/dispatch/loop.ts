@@ -23,6 +23,7 @@ import { PhaseGate } from "./PhaseGate.js";
 import { MemoryStore } from "../agents/memory.js";
 import { WireAgent } from "../agents/wire-agent.js";
 import { runOllama, runGemini, runCodex, runSystem, runLlama4, runDeepSeek, runClaude, runAgy } from "./workers.js";
+import { isAgentAllowed } from "../router/agentAllowlist.js";
 import type { WorkerResult } from "./workers.js";
 import type { WirePayload, AgentId, OutcomeRecord } from "../types.js";
 import { AgentCooldownStore, classifyFailure } from "../router/agentCooldown.js";
@@ -93,6 +94,14 @@ export class DispatchLoop {
     if (this.running) return;
     this.running = true;
     console.log(`[dispatch] started — watching ${this.config.inboxDir}`);
+    // Surface retired/previous-generation models at startup, not on first failure.
+    if (process.env["WIRE_SKIP_MODEL_CHECK"] !== "1" && process.env["NODE_ENV"] !== "test") {
+      void import("./modelFreshness.js").then(({ checkAllModels }) => {
+        for (const c of checkAllModels()) {
+          if (c.status !== "ok") console.warn(`[dispatch] model check: ${c.agent} ${c.status} — ${c.configured}: ${c.detail}`);
+        }
+      }).catch(e => console.warn(`[dispatch] model check failed: ${(e as Error).message}`));
+    }
 
     // Process any messages already in inbox before watcher starts
     this.scanInbox();
@@ -332,6 +341,12 @@ export class DispatchLoop {
   // ── Dispatch a single agent, reject immediately on timeout/error ──────────
 
   private async callAgent(agent: AgentId, skill: string, payload: Record<string, unknown>, enrichedContext: string | undefined): Promise<WorkerResult> {
+    // Second layer behind the router: never run an agent the operator has
+    // disabled via WIRE_ROUTING_AGENTS, whatever chose it. Throwing records an
+    // honest failure; runWorker moves on to the next allowed agent.
+    if (!isAgentAllowed(agent)) {
+      throw new Error(`agent ${agent} is disabled by WIRE_ROUTING_AGENTS`);
+    }
     if (agent === "system" || skill === "system") {
       return runSystem(payload);
     } else if (agent === "ollama") {

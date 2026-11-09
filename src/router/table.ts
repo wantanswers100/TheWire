@@ -52,7 +52,7 @@ export const AGENT_PROFILES: Record<string, AgentProfile> = {
     id: "antigravity",
     costTier: "free",
     strengths: ["research", "plan", "synthesis", "explain", "large-context"],
-    notes: "Gemini Flash/Pro via agy CLI (Google account OAuth). Tiers: flash-low/medium/high and pro-low/pro-high. Default: gemini-3.7-flash-medium. Flex up to pro-high via AGY_RESEARCH env var. No token reporting.",
+    notes: "Gemini Flash/Pro via agy CLI (Google account OAuth). Tiers: flash-low/medium/high and pro-low/pro-high. Default: gemini-3.8-flash-medium. Flex up to pro-high via AGY_RESEARCH env var. No token reporting.",
   },
 };
 

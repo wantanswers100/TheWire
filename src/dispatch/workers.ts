@@ -637,9 +637,9 @@ export async function runCodexWrite(
 // configured = CLI present and executable (checkAgyAuth).
 //
 // Model tiers (set via env or AGY_SKILL_MODEL):
-//   gemini-3.7-flash-low    → fastest, minimal reasoning effort
-//   gemini-3.7-flash-medium → balanced (Wire default)
-//   gemini-3.7-flash-high   → max reasoning effort on flash
+//   gemini-3.8-flash-low    → fastest, minimal reasoning effort
+//   gemini-3.8-flash-medium → balanced (Wire default)
+//   gemini-3.8-flash-high   → max reasoning effort on flash
 //   gemini-3.1-pro-low      → frontier, balanced effort
 //   gemini-3.1-pro-high     → frontier, max effort
 //
@@ -667,11 +667,19 @@ export async function runAgy(skill: string, payload: Record<string, unknown>, en
   // as runCodex/runClaude. agy prompt is passed as a CLI arg (agy has no stdin mode);
   // this is visible in /proc/<pid>/cmdline for the subprocess lifetime. Documented
   // limitation — do not refactor to stdin without verifying agy supports it.
-  const result = await spawnAsync(
-    "agy",
-    ["--print", prompt, "--model", model],
-    { timeout: 300_000, shell: false, maxBuffer: 4 * 1024 * 1024 } as any
-  );
+  const spawnAgy = (args: string[]) =>
+    spawnAsync("agy", args, { timeout: 300_000, shell: false, maxBuffer: 4 * 1024 * 1024 } as any);
+  let result = await spawnAgy(["--print", prompt, "--model", model]);
+  let ranModel = model;
+
+  // agy retires model names (gemini-3.7-flash-* → 3.8, 2026-11): an unknown
+  // configured model used to fail every agy dispatch. Retry once on agy's own
+  // default and record that in the model field, so it is visible, not silent.
+  if (result.status !== 0 && /invalid model selection|not recognized as a known model/i.test(result.stderr ?? "")) {
+    console.warn(`[agy] configured model "${model}" unknown to agy; retrying with agy's default. Update AGY_* in .env or src/config/models.ts.`);
+    result = await spawnAgy(["--print", prompt]);
+    ranModel = `default (configured ${model} unknown)`;
+  }
 
   if (result.error) {
     const isTimeout = (result.error as NodeJS.ErrnoException).code === "ETIMEDOUT";
@@ -693,5 +701,5 @@ export async function runAgy(skill: string, payload: Record<string, unknown>, en
   const text = (result.stdout ?? "").trim();
   if (!text) throw new Error(`agy returned no output (model: ${model}, stderr: ${result.stderr?.slice(0, 200)})`);
 
-  return { text, model: `agy/${model}` };
+  return { text, model: `agy/${ranModel}` };
 }

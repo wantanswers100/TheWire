@@ -10,6 +10,7 @@
 // retries is mandatory (flagged as biggest risk in architecture review).
 
 import { z } from "zod";
+import { isAgentAllowed } from "./agentAllowlist.js";
 import { withOllamaLock } from "./ollamaGate.js";
 
 const OLLAMA = process.env["OLLAMA_URL"] ?? "http://localhost:11434";
@@ -136,6 +137,8 @@ function extractJson(raw: string): string {
 
 export async function classify(taskText: string): Promise<ClassifierResult | null> {
   if (!taskText.trim()) return null;
+  // Ollama disabled by WIRE_ROUTING_AGENTS: callers fall back to keywordClassify.
+  if (!isAgentAllowed("ollama")) return null;
 
   const prompt = buildPrompt(taskText.slice(0, 1000)); // cap input length
 
@@ -188,8 +191,7 @@ function extractSubject(text: string): string {
   return text
     .replace(/^(please |can you |could you |i need |i want |help me |wire\s*-?\s*)/i, "")
     .replace(/^(what(?:'s| is| are| were) the? |what(?:'s| is| are) |how (?:is|are) the? |who is the? )/i, "")
-    .trim()
-    .slice(0, 80);
+    .trim();
 }
 
 // ─── Linux intent detection ───────────────────────────────────────────────────
@@ -624,6 +626,7 @@ const _extendedCache = new Map<string, ClassifierExtendedResult>();
 export async function classifyExtended(taskText: string): Promise<ClassifierExtendedResult | null> {
   const text = taskText.trim().slice(0, 1000);
   if (!text) return null;
+  if (!isAgentAllowed("ollama")) return null;  // keyword fallback (WIRE_ROUTING_AGENTS)
 
   const cacheKey = text.toLowerCase();
   const cached = _extendedCache.get(cacheKey);

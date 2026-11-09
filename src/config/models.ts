@@ -169,33 +169,33 @@ export const DEEPSEEK_SKILL_MODEL: Record<string, string> = {
 // agy CLI exposes Gemini model families with per-model effort tiers:
 //
 //   Flash family (fast, high-volume):
-//     gemini-3.7-flash-low    — fastest, minimal reasoning effort
-//     gemini-3.7-flash-medium — balanced (Wire default for most skills)
-//     gemini-3.7-flash-high   — max reasoning effort on flash model
+//     gemini-3.8-flash-low    — fastest, minimal reasoning effort
+//     gemini-3.8-flash-medium — balanced (Wire default for most skills)
+//     gemini-3.8-flash-high   — max reasoning effort on flash model
 //
-//   Pro family (frontier, complex tasks):
-//     gemini-3.1-pro-low      — frontier model, balanced effort
-//     gemini-3.1-pro-high     — frontier model, max effort
+//   Gemini 4 Argon (frontier, complex tasks; replaced 3.1 Pro in agy 1.5.x):
+//     gemini-4-argon-low      — frontier model, balanced effort
+//     gemini-4-argon-high     — frontier model, max effort
 //
 // Flex guidance:
-//   Flex DOWN (speed/quota): set AGY_DEFAULT=gemini-3.7-flash-low in .env
-//   Flex UP (quality):       set AGY_RESEARCH=gemini-3.1-pro-high in .env
-//   Frontier for synthesis:  set AGY_SYNTHESIZE=gemini-3.1-pro-high in .env
+//   Flex DOWN (speed/quota): set AGY_DEFAULT=gemini-3.8-flash-low in .env
+//   Flex UP (quality):       set AGY_RESEARCH=gemini-4-argon-high in .env
+//   Frontier for synthesis:  set AGY_SYNTHESIZE=gemini-4-argon-high in .env
 //
 // Env overrides (all optional):
-//   AGY_DEFAULT     gemini-3.7-flash-medium   (base for all unmapped skills)
-//   AGY_RESEARCH    gemini-3.7-flash-medium   (flex up: gemini-3.1-pro-high)
-//   AGY_PLAN        gemini-3.7-flash-medium
-//   AGY_EXPLAIN     gemini-3.7-flash-low      (speed-optimised)
-//   AGY_SUMMARIZE   gemini-3.7-flash-low
-//   AGY_SYNTHESIZE  gemini-3.1-pro-low        (frontier for deep synthesis)
+//   AGY_DEFAULT     gemini-3.8-flash-medium   (base for all unmapped skills)
+//   AGY_RESEARCH    gemini-3.8-flash-medium   (flex up: gemini-4-argon-high)
+//   AGY_PLAN        gemini-3.8-flash-medium
+//   AGY_EXPLAIN     gemini-3.8-flash-low      (speed-optimised)
+//   AGY_SUMMARIZE   gemini-3.8-flash-low
+//   AGY_SYNTHESIZE  gemini-4-argon-low        (frontier for deep synthesis)
 
-export const AGY_DEFAULT_MODEL = env("AGY_DEFAULT", "gemini-3.7-flash-medium");
+export const AGY_DEFAULT_MODEL = env("AGY_DEFAULT", "gemini-3.8-flash-medium");
 
 export const AGY_SKILL_MODEL: Record<string, string> = {
   research:  env("AGY_RESEARCH",   AGY_DEFAULT_MODEL),
   plan:      env("AGY_PLAN",       AGY_DEFAULT_MODEL),
-  explain:   env("AGY_EXPLAIN",    "gemini-3.7-flash-low"),
-  summarize: env("AGY_SUMMARIZE",  "gemini-3.7-flash-low"),
-  synthesize: env("AGY_SYNTHESIZE", "gemini-3.1-pro-low"),
+  explain:   env("AGY_EXPLAIN",    "gemini-3.8-flash-low"),
+  summarize: env("AGY_SUMMARIZE",  "gemini-3.8-flash-low"),
+  synthesize: env("AGY_SYNTHESIZE", "gemini-4-argon-low"),
 };

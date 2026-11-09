@@ -15,6 +15,7 @@
 //   - evalStore.record() is non-blocking: quality check never blocks delivery.
 
 import type { WorkerResult } from "./workers.js";
+import { isAgentAllowed } from "../router/agentAllowlist.js";
 import type { EvalStore } from "./EvalStore.js";
 
 const OLLAMA = "http://localhost:11434";
@@ -99,6 +100,10 @@ function sanitizeWorkerOutputForPrompt(text: string): string {
 // content — sanitized before storage or propagation.
 
 async function ollamaJudge(result: WorkerResult, subject: string, skill: string): Promise<JudgeResult> {
+  // Same fail-open convention as an unreachable Ollama: recorded as a skip.
+  if (!isAgentAllowed("ollama")) {
+    return { verdict: "pass", reason: "judge unavailable: ollama disabled by WIRE_ROUTING_AGENTS" };
+  }
   const safeOutput = sanitizeWorkerOutputForPrompt(result.text);
 
   const prompt = [
